@@ -64,6 +64,23 @@
             Sample = Sample + argument1;
             return Sample;
         }
+        function AUTO(argument1, btn, link) {
+            var Sample = '<a href=';
+            Sample = Sample + link;
+            Sample = Sample + ' target="_blank" class="btn btn-';
+            if (btn == "") {
+                btn = "default  btn-outline-dark"
+            }
+            Sample = Sample + btn;
+            Sample = Sample + '" style="margin-bottom: 4.5px; margin-right: 4.5px;">';
+            Sample = Sample + argument1;
+            Sample = Sample + '</a>';
+            Sample = Sample + '<img src=https://s2.googleusercontent.com/s2/favicons?domain_url="';
+            Sample = Sample + link;
+            Sample = Sample + '" height="18px" class="rounded" style="vertical-align: text-bottom; margin-bottom: 2px; " > ';
+            Sample = Sample + argument1;
+            return Sample;
+        }
         function Items(argument1) {
             const header = ListHeader(argument1);
             const footer = ListFooter();
@@ -86,6 +103,7 @@
                     Add(Icon("GetPocket", "fab fa-get-pocket"), "", "https://getpocket.com/"),
                     Add(Link("Link 수정", "https://github.com/favicon.ico"), "", "https://github.dev/Reevid/Link"),
                     Add(Link("Blog 컨텐츠 모으기", "https://github.com/favicon.ico"), "", "https://github.com/Reevid/Reevid.github.io/edit/master/_draft/temp.md"),
+                    AUTO("test","", "https://getpocket.com/")
                 );
                 Items(
                     "블로그",
