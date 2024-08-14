@@ -107,8 +107,6 @@
                     AUTO("Link 수정",  "", "https://github.dev/42jerrykim/Link/blob/main"),
                     AUTO("Google Alart", "", "https://www.google.co.kr/alerts"),
                     Add(Link("DSM", "https://play-lh.googleusercontent.com/HjbYWbXJ-6e6Cia-mBbHDSdontW1yE6MHMaXqlHW80CQegDOEPQ1HGACxvEpnqCUHgo"), "", "https://jerrykim.synology.me:5001/"),
-                    Add(Link("Photo", "https://global.synologydownload.com/download/Package/img/SynologyPhotos/1.6.1-0641/thumb_256.png"), "", "https://jerrykim.synology.me:5001/?launchApp=SYNO.Foto.AppInstance"),
-                    Add(Link("Immich", "https://play-lh.googleusercontent.com/ZpV8EMn8XZ_8V1GipeeZ4y-xeXJiQD5vlJkLTSJ7NN1ty9ZdHG6AVDA-71QsjsaL4A"), "", "https://immich.jerrykim.synology.me"),
                     Add(Link("Scrap", "https://github.com/favicon.ico"), "", "https://github.com/42jerrykim/42jerrykim.github.io/edit/main/scrap.md"),
                 );
                 Items(
@@ -123,13 +121,19 @@
                     Add(Link("맞춤법 ", "http://speller.cs.pusan.ac.kr/favicon.ico"), "", "http://speller.cs.pusan.ac.kr/"),
                 );
                 Items(
+                    "Photo",
+                    Add(Link("Photo", "https://global.synologydownload.com/download/Package/img/SynologyPhotos/1.6.1-0641/thumb_256.png"), "", "https://jerrykim.synology.me:5001/?launchApp=SYNO.Foto.AppInstance"),
+                    Add(Link("Immich", "https://play-lh.googleusercontent.com/ZpV8EMn8XZ_8V1GipeeZ4y-xeXJiQD5vlJkLTSJ7NN1ty9ZdHG6AVDA-71QsjsaL4A"), "", "https://immich.jerrykim.synology.me"),
+                    AUTO("Google", "", "https://photos.google.com/"),
+                );
+                Items(
                     "Mail",
                     Add(Link("Reevid", "https://outlook.live.com/mail/favicon.ico"), "", "https://outlook.live.com/mail/0/"),
                     Add(Link("42jerrykim", "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico"), "", "https://mail.google.com/mail/u/0/"),
                 );
                 Items(
                     "Media",
-                    Add(Link("Desktop", "./plex_icon_130854.ico"), "", "https://app.plex.tv/"),
+                    Add(Link("Plex", "./plex_icon_130854.ico"), "", "https://app.plex.tv/"),
                     Add(Link("YouTube", "https://www.youtube.com/s/desktop/ad0ef434/img/favicon.ico"), "", "https://www.youtube.com/"),
                     Add(Link("YouTube Music", "https://user-images.githubusercontent.com/868109/63057127-5d3e8780-be9e-11e9-9488-bf280a5ff1ed.png"), "", "https://music.youtube.com/"),
                     Add(Icon("Facebook Watch", "fab fa-facebook-square"), "", "https://www.facebook.com/watch"),
@@ -145,7 +149,6 @@
                     );
                 Items(
                     "Plex",
-                    Add(Link("Tautilli", "https://tautulli.com/images/favicon.ico"), "", "http://localhost:8181/home"),
                     Add(Link("Console", "./plex_icon_130854.ico"), "", "https://app.plex.tv/desktop#!/settings/server/cea0b598676e122d3fe5e86e9eac69ac8fb162ce/manage/console"),
                     Add(Link("Movies", "./plex_icon_130854.ico"), "", "053071"),
                     Add(Link("Plex", "https://ssl.pstatic.net/static/common/gnb/2018/service_logo/cafe.png"), "", "https://cafe.naver.com/plexserver"),
