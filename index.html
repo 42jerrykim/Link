@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <title>⚡ Site Links ⚡</title>
+    <style>
+      /* 기본 배경 및 폰트 설정 */
+      body {
+        background: #f0f2f5;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+        color: #333;
+      }
+      
+      /* 기본 모바일: 2열 (gutter 20px 기준) */
+      .grid-sizer,
+      .grid-item {
+        width: calc((100% - 20px) / 2);
+      }
+      /* 2열 아이템 (기본 모바일) */
+      .grid-item--width2 { 
+        width: calc(((100% - 20px) / 2) * 2 + 20px);
+      }
+      
+      /* 중간 화면: 600px 이상 -> 3열 (2개의 gutter) */
+      @media (min-width: 600px) {
+        .grid-sizer,
+        .grid-item {
+          width: calc((100% - 40px) / 3);
+        }
+        .grid-item--width2 { 
+          width: calc(((100% - 40px) / 3) * 2 + 20px);
+        }
+      }
+      
+      /* 큰 화면: 992px 이상 -> 5열 (4개의 gutter) */
+      @media (min-width: 992px) {
+        .grid-sizer,
+        .grid-item {
+          width: calc((100% - 80px) / 4);
+        }
+        .grid-item--width2 { 
+          width: calc(((100% - 80px) / 4) * 2 + 20px);
+        }
+      }
+      
+      /* grid-item 카드 스타일 */
+      .grid-item {
+        background: #fff;
+        margin-bottom: 20px;
+        padding: 15px;
+        box-sizing: border-box;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      
+      /* 그룹 헤더 스타일 */
+      .group-header {
+        font-weight: 600;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 1.3em;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #ddd;
+        color: #555;
+      }
+      
+      /* 그룹 내 아이템 컨테이너: 좌우 끝 정렬 */
+      .item-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      
+      /* 각 아이템 카드 스타일 */
+      .item {
+        margin: 5px;
+        font-size: 1.1rem;
+      }
+      .item:hover {
+        background: #f1f1f1;
+      }
+      .item a {
+        text-decoration: none;
+        color: #333;
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+      .item img {
+        width: 25px;
+        height: 25px;
+        margin-right: 3px;
+      }
+    </style>
+  </head>
+<body>
+  <!-- 중앙 정렬된 grid-wrapper -->
+  <div class="grid-wrapper">
+    <!-- Masonry 레이아웃 컨테이너 -->
+    <div class="grid" id="grid">
+      <!-- grid-sizer 요소: 열 너비 결정에 사용 -->
+      <div class="grid-sizer"></div>
+    </div>
+  </div>
+
+  <!-- jQuery 라이브러리 -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Masonry 라이브러리 -->
+  <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+  
+  <script>
+    // Masonry 그리드 객체
+    let $grid = null;
+    // 데이터 소스 순서 정의 (정렬 기준)
+    const dataOrder = ['link1', 'link2', 'link3', 'link4', 'link5'];
+    // 로드된 데이터 저장 객체
+    const loadedData = {};
+
+    // CSV 파싱 함수 (첫 줄은 헤더로 간주)
+    function parseCSV(text) {
+      const lines = text.trim().split('\n');
+      const headers = lines[0].split(',');
+      const data = [];
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        const values = line.split(',');
+        const entry = {};
+        headers.forEach((header, index) => {
+          entry[header.trim()] = values[index] ? values[index].trim() : '';
+        });
+        data.push(entry);
+      }
+      return data;
+    }
+
+    // CSV 파일을 fetch하고 반환하는 함수
+    async function fetchCSV(file, sourceName) {
+      try {
+        const response = await fetch(file);
+        if (!response.ok) {
+          console.warn(`${file} not found or error: ${response.status}`);
+          return { source: sourceName, data: [] };
+        }
+        
+        const text = await response.text();
+        if (text === "") return { source: sourceName, data: [] };
+        
+        const data = parseCSV(text);
+        data.forEach(item => item.source = sourceName);
+        return { source: sourceName, data };
+      } catch (error) {
+        console.error(`Error fetching ${file}:`, error);
+        return { source: sourceName, data: [] };
+      }
+    }
+
+    // 그룹 데이터를 생성하는 함수
+    function groupData(data) {
+      const groups = {};
+      data.forEach(item => {
+        if (!item.group) return; // 그룹이 없는 항목은 건너뛰기
+        const key = item.source + '::' + item.group;
+        if (!groups[key]) {
+          groups[key] = [];
+        }
+        groups[key].push(item);
+      });
+      return groups;
+    }
+
+    // grid 내부에 그룹 요소를 생성하는 함수 (하나의 그룹에 대해)
+    function createGroupElement(source, groupName, items) {
+      const groupDiv = document.createElement('div');
+      groupDiv.className = 'grid-item';
+      groupDiv.dataset.source = source;
+      groupDiv.dataset.group = groupName;
+      
+      const header = document.createElement('div');
+      header.className = 'group-header';
+      header.textContent = groupName;
+      groupDiv.appendChild(header);
+      
+      const itemContainer = document.createElement('div');
+      itemContainer.className = 'item-container';
+      
+      items.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'item';
+        
+        const link = document.createElement('a');
+        link.href = item.link;
+        link.target = '_blank';
+        
+        // favicon 이미지 처리
+        const img = document.createElement('img');
+        let faviconURL = "";
+        if (item.favicon && item.favicon.trim() !== "") {
+          faviconURL = item.favicon;
+        } else {
+          try {
+            const urlObj = new URL(item.link);
+            faviconURL = "https://www.google.com/s2/favicons?domain=" + urlObj.hostname;
+          } catch (e) {
+            faviconURL = "https://42jerrykim.github.io/favicon.ico";
+          }
+        }
+        img.src = faviconURL;
+        img.alt = item.name;
+        img.onerror = function() {
+          this.onerror = null;
+          this.src = "https://42jerrykim.github.io/favicon.ico";
+        };
+        link.appendChild(img);
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = item.name;
+        link.appendChild(nameSpan);
+        
+        itemDiv.appendChild(link);
+        itemContainer.appendChild(itemDiv);
+      });
+      
+      groupDiv.appendChild(itemContainer);
+      return groupDiv;
+    }
+
+    // grid 내부를 dataOrder 순서대로 다시 렌더링하는 함수
+    function renderAllGroups() {
+      const grid = document.getElementById('grid');
+      // grid-sizer 요소 보존 후 내부 초기화
+      const gridSizer = grid.querySelector('.grid-sizer');
+      grid.innerHTML = '';
+      grid.appendChild(gridSizer);
+
+      // dataOrder 순서대로 각 소스의 그룹 생성 및 추가
+      dataOrder.forEach(source => {
+        if (loadedData[source] && loadedData[source].length > 0) {
+          const groups = groupData(loadedData[source]);
+          Object.keys(groups).forEach(key => {
+            // key 형식: "source::groupName"
+            const [src, groupName] = key.split('::');
+            const groupElement = createGroupElement(src, groupName, groups[key]);
+            grid.appendChild(groupElement);
+          });
+        }
+      });
+
+      // Masonry 레이아웃 업데이트
+      if ($grid) {
+        $grid.masonry('reloadItems').masonry('layout');
+      } else {
+        $grid = $('.grid').masonry({
+          itemSelector: '.grid-item',
+          columnWidth: '.grid-sizer',
+          percentPosition: true,
+          gutter: 20
+        });
+      }
+    }
+
+    // CSV 데이터를 각각 비동기로 로드하고, 로드 완료 시 데이터가 있으면 화면 업데이트
+    function loadData() {
+      const dataSources = [
+        { url: 'link1.csv', name: 'link1' },
+        { url: 'link2.csv', name: 'link2' },
+        { url: 'link3.csv', name: 'link3' },
+        { url: 'link4.csv', name: 'link4' },
+        { url: 'link5.csv', name: 'link5' }
+      ];
+      
+      dataSources.forEach(source => {
+        fetchCSV(source.url, source.name)
+          .then(result => {
+            // 결과 데이터가 존재할 때만 화면 업데이트
+            if (result.data && result.data.length > 0) {
+              loadedData[result.source] = result.data;
+              renderAllGroups();
+            }
+          });
+      });
+    }
+
+    // 윈도우 리사이즈 이벤트: Masonry 레이아웃 재계산
+    window.addEventListener('resize', function() {
+      if ($grid) $grid.masonry('layout');
+    });
+
+    // DOMContentLoaded 후 데이터 로드 시작
+    document.addEventListener('DOMContentLoaded', loadData);
+  </script>
+</body>
+</html>
