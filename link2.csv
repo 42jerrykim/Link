@@ -1,4 +1,5 @@
 group,name,favicon,link
+My,DSM,https://play-lh.googleusercontent.com/HjbYWbXJ-6e6Cia-mBbHDSdontW1yE6MHMaXqlHW80CQegDOEPQ1HGACxvEpnqCUHgo,http://QuickConnect.to/jerrykim
 My,Google 캘린더,https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Google_Calendar_icon_%282020%29.svg/330px-Google_Calendar_icon_%282020%29.svg.png,https://calendar.google.com/calendar/u/0/r/customweek
 My,Tasks,./Google_Tasks.png,https://calendar.google.com/calendar/u/0/r/tasks
 My,Google Alart,,https://www.google.co.kr/alerts
@@ -6,7 +7,6 @@ My,DSM,https://play-lh.googleusercontent.com/HjbYWbXJ-6e6Cia-mBbHDSdontW1yE6MHMa
 My,Surveillance Station,https://global.synologydownload.com/download/Package/img/SurveillanceStation/9.2.2-11575/thumb_256.png,https://jerrykim.synology.me:5001/webman/3rdparty/SurveillanceStation/
 My,Scrap,https://github.com/favicon.ico,https://github.com/42jerrykim/42jerrykim.github.io/edit/main/scrap.md
 My,Notion,,https://notion.so
-My,GetPocket,,https://getpocket.com/
 My,Link 수정,,https://github.dev/42jerrykim/Link/blob/main
 블로그,Blog,https://42jerrykim.github.io/favicon.ico,https://42jerrykim.github.io/
 블로그,Blog Repo,https://github.com/favicon.ico,https://github.com/42jerrykim/42jerrykim.github.io
@@ -120,3 +120,4 @@ Garmin,Fenix 7,http://download.garmin.com/favicon.ico,http://download.garmin.com
 카메라,DSC-RX100M7,https://www.sony.co.kr/static-assets/images/Favicon_144x144.png,https://www.sony.co.kr/electronics/support/compact-cameras-dsc-rx100m7#manuals
 카메라,GP-VPT2BT,https://www.sony.co.kr/static-assets/images/Favicon_144x144.png,https://www.sony.co.kr/electronics/support/camera-camcorder-accessories-tripods-grips/gp-vpt2bt/manuals
 GSuite,GSuite,https://ssl.pstatic.net/static/common/gnb/2018/service_logo/cafe.png,https://cafe.naver.com/gsuite
+Legacy,GetPocket,,https://getpocket.com/
