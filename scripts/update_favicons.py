@@ -689,10 +689,111 @@ def main(argv: list[str]) -> int:
         shutil.copyfile(csv_path, backup_path)
         print(f"[backup] {backup_path}", flush=True)
 
-    with open(csv_path, "r", encoding="utf-8", newline="") as f:
-        reader = csv.DictReader(f)
-        fieldnames = reader.fieldnames or []
-        rows = list(reader)
+    def read_csv_with_repair(path: str) -> tuple[list[str], list[dict[str, str]], dict[str, object]]:
+        """
+        Read CSV as dict rows, repairing malformed lines that have too many/few columns.
+
+        Why this exists:
+        - csv.DictReader uses `None` as a key when a row has more fields than the header.
+          Those `None` keys later crash csv.DictWriter with:
+            ValueError: dict contains fields not in fieldnames: None
+        """
+        stats: dict[str, object] = {
+            "rows_total": 0,
+            "rows_blank_skipped": 0,
+            "rows_normalized": 0,
+            "rows_padded": 0,
+            "rows_truncated": 0,
+            "rows_join_name_repaired": 0,
+            "examples": {},  # type: ignore[typeddict-item]
+        }
+
+        with open(path, "r", encoding="utf-8", newline="") as f:
+            r = csv.reader(f)
+            try:
+                raw_header = next(r)
+            except StopIteration:
+                return [], [], stats
+
+            # Keep header order stable; strip whitespace-only header cells.
+            fieldnames = [(h or "").strip() for h in raw_header]
+            rows: list[dict[str, str]] = []
+
+            line_no = 1  # header line
+            for raw in r:
+                line_no += 1
+                stats["rows_total"] = int(stats["rows_total"]) + 1
+
+                if not raw or all(((c or "").strip() == "") for c in raw):
+                    stats["rows_blank_skipped"] = int(stats["rows_blank_skipped"]) + 1
+                    continue
+
+                expected = len(fieldnames)
+                got = len(raw)
+                values: list[str]
+
+                if got == expected:
+                    values = [c or "" for c in raw]
+                elif got < expected:
+                    values = [c or "" for c in raw] + [""] * (expected - got)
+                    stats["rows_normalized"] = int(stats["rows_normalized"]) + 1
+                    stats["rows_padded"] = int(stats["rows_padded"]) + 1
+                    examples = stats.get("examples", {})
+                    if isinstance(examples, dict) and "padded" not in examples:
+                        examples["padded"] = {"line": line_no, "got": got, "expected": expected}
+                else:
+                    # Too many columns. Common root cause: unquoted commas in the "name" field.
+                    if fieldnames == ["group", "name", "favicon", "link"] and expected == 4 and got >= 4:
+                        group = raw[0] or ""
+                        link = raw[-1] or ""
+                        favicon = raw[-2] or ""
+                        name = ",".join((c or "") for c in raw[1:-2])
+                        values = [group, name, favicon, link]
+                        stats["rows_normalized"] = int(stats["rows_normalized"]) + 1
+                        stats["rows_join_name_repaired"] = int(stats["rows_join_name_repaired"]) + 1
+                        examples = stats.get("examples", {})
+                        if isinstance(examples, dict) and "join_name_repaired" not in examples:
+                            examples["join_name_repaired"] = {"line": line_no, "got": got, "expected": expected}
+                    else:
+                        # Generic fallback: truncate extras to avoid None-keys and keep script running.
+                        values = [(c or "") for c in raw[:expected]]
+                        stats["rows_normalized"] = int(stats["rows_normalized"]) + 1
+                        stats["rows_truncated"] = int(stats["rows_truncated"]) + 1
+                        examples = stats.get("examples", {})
+                        if isinstance(examples, dict) and "truncated" not in examples:
+                            examples["truncated"] = {"line": line_no, "got": got, "expected": expected}
+
+                # Build a dict row with exactly the header keys (no None keys).
+                row = {fieldnames[i]: values[i] for i in range(min(len(fieldnames), len(values)))}
+                rows.append(row)
+
+        return fieldnames, rows, stats
+
+    fieldnames, rows, csv_stats = read_csv_with_repair(csv_path)
+
+    if not fieldnames:
+        print(f"[error] CSV is empty or missing a header row: {csv_path}", file=sys.stderr)
+        return 2
+
+    if int(csv_stats.get("rows_normalized", 0) or 0) > 0:
+        print(
+            "[warn] CSV rows normalized to match header. "
+            f"normalized={csv_stats.get('rows_normalized', 0)} "
+            f"padded={csv_stats.get('rows_padded', 0)} "
+            f"truncated={csv_stats.get('rows_truncated', 0)} "
+            f"join_name_repaired={csv_stats.get('rows_join_name_repaired', 0)} "
+            f"blank_skipped={csv_stats.get('rows_blank_skipped', 0)}",
+            file=sys.stderr,
+        )
+        examples = csv_stats.get("examples", {})
+        if isinstance(examples, dict) and examples:
+            # Keep this compact: show first example line(s) only.
+            parts = []
+            for k, v in examples.items():
+                if isinstance(v, dict) and "line" in v:
+                    parts.append(f"{k}=line{v.get('line')}")
+            if parts:
+                print(f"[warn] examples: " + ", ".join(parts), file=sys.stderr)
 
     if "link" not in fieldnames or "favicon" not in fieldnames:
         print(f"[error] CSV must include 'link' and 'favicon' columns. Got: {fieldnames}", file=sys.stderr)
@@ -751,8 +852,17 @@ def main(argv: list[str]) -> int:
         return 0
 
     with open(csv_path, "w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
+        writer = csv.DictWriter(
+            f,
+            fieldnames=fieldnames,
+            lineterminator="\n",
+            extrasaction="ignore",
+        )
         writer.writeheader()
+        # Defensive: ensure no stray None-key survives.
+        for row in rows:
+            if None in row:  # type: ignore[operator]
+                row.pop(None, None)  # type: ignore[arg-type]
         writer.writerows(rows)
 
     elapsed = time.time() - start
