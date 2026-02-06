@@ -6,16 +6,16 @@ My,Google Alart,./favicons/www.google.co.kr-50f4cc43.ico,https://www.google.co.k
 My,DSM,https://play-lh.googleusercontent.com/HjbYWbXJ-6e6Cia-mBbHDSdontW1yE6MHMaXqlHW80CQegDOEPQ1HGACxvEpnqCUHgo,https://jerrykim.synology.me:5001/
 My,Surveillance Station,https://global.synologydownload.com/download/Package/img/SurveillanceStation/9.2.2-11575/thumb_256.png,https://jerrykim.synology.me:5001/webman/3rdparty/SurveillanceStation/
 My,Scrap,./favicons/github.com-84b7e44a.png,https://github.com/42jerrykim/42jerrykim.github.io/edit/main/scrap.md
-My,Notion,./favicons/notion.so-40518bb0.png,https://notion.so
-My,Link 수정,./favicons/github.dev-bd74a433.png,https://github.dev/42jerrykim/Link/blob/main
+My,Notion,./favicons/notion.so-40518bb0.ico,https://notion.so
+My,Link 수정,./favicons/github.dev-bd74a433.ico,https://github.dev/42jerrykim/Link/blob/main
 블로그,Blog,./favicons/42jerrykim.github.io-2f6453da.ico,https://42jerrykim.github.io/
 블로그,Blog Repo,./favicons/github.com-84b7e44a.png,https://github.com/42jerrykim/42jerrykim.github.io
-블로그,Blog Post 작성,./favicons/github.dev-bd74a433.png,https://github.dev/42jerrykim/42jerrykim.github.io
+블로그,Blog Post 작성,./favicons/github.dev-bd74a433.ico,https://github.dev/42jerrykim/42jerrykim.github.io
 블로그,AdSence,./favicons/www.google.com-ef7efc98.ico,https://www.google.com/adsense/new/u/0/pub-1523508823345999/
 블로그,Search Console,./favicons/search.google.com-991241b4.png,https://search.google.com/search-console
 블로그,Analytics,./favicons/analytics.google.com-2971a4bb.ico,https://analytics.google.com/analytics/web/#/p378371944/
 블로그,SearchAdvisor,./favicons/searchadvisor.naver.com-4e39447a.ico,https://searchadvisor.naver.com/
-블로그,WebMasters,./favicons/www.bing.com-0d6e3170.png,https://www.bing.com/webmasters
+블로그,WebMasters,./favicons/www.bing.com-0d6e3170.ico,https://www.bing.com/webmasters
 블로그,Google,./favicons/www.google.com-ef7efc98.ico,https://www.google.com/search?client=firefox-b-d&q=site%3A42jerrykim.github.io
 블로그,맞춤법 ,http://speller.cs.pusan.ac.kr/favicon.ico,http://speller.cs.pusan.ac.kr/
 Photo,Photo,https://global.synologydownload.com/download/Package/img/SynologyPhotos/1.6.1-0641/thumb_256.png,https://jerrykim.synology.me:5001/?launchApp=SYNO.Foto.AppInstance
@@ -23,19 +23,19 @@ Photo,Immich,https://play-lh.googleusercontent.com/ZpV8EMn8XZ_8V1GipeeZ4y-xeXJiQ
 Photo,Google,./favicons/photos.google.com-6cb79b66.svg,https://photos.google.com/
 Mail,Reevid,./favicons/outlook.live.com-6db7198a.ico,https://outlook.live.com/mail/0/
 Mail,42jerrykim,./favicons/mail.google.com-25d958f4.ico,https://mail.google.com/mail/u/0/
-Media,Plex,./favicons/app.plex.tv-f3c5d88c.png,https://app.plex.tv/
+Media,Plex,./favicons/app.plex.tv-f3c5d88c.ico,https://app.plex.tv/
 Media,YouTube,./favicons/www.youtube.com-1e06e9ee.png,https://www.youtube.com/
 Media,YouTube Music,./favicons/music.youtube.com-8ca24b3a.png,https://music.youtube.com/
 Media,Facebook Watch,./favicons/www.facebook.com-686e43a9.ico,https://www.facebook.com/watch
-Media,Netfilx,./favicons/www.netflix.com-c7e6040a.png,https://www.netflix.com/
+Media,Netfilx,./favicons/www.netflix.com-c7e6040a.ico,https://www.netflix.com/
 Media,Disney Plus,./favicons/www.disneyplus.com-0a302fd6.png,https://www.disneyplus.com
 Media,Wavve,./favicons/www.wavve.com-f2491ed6.ico,https://www.wavve.com/
-Media,Watcha,./favicons/watcha.com-11e71562.png,https://watcha.com
+Media,Watcha,./favicons/watcha.com-11e71562.ico,https://watcha.com
 Media,TV Wiki,./favicons/t.me-c200b187.png,https://t.me/s/tvwiki_url
 Media,TVMon,./favicons/t.me-c200b187.png,https://t.me/s/tvmon_noti
 Media Search,Just Watch,./favicons/www.justwatch.com-4f2c2b76.ico,https://www.justwatch.com/
 Media Search,WatchaPedia,./favicons/pedia.watcha.com-c2555eef.ico,https://pedia.watcha.com/ko-KR
-Plex,Console,./favicons/app.plex.tv-f3c5d88c.png,https://app.plex.tv/desktop#!/settings/server/cea0b598676e122d3fe5e86e9eac69ac8fb162ce/manage/console
+Plex,Console,./favicons/app.plex.tv-f3c5d88c.ico,https://app.plex.tv/desktop#!/settings/server/cea0b598676e122d3fe5e86e9eac69ac8fb162ce/manage/console
 Plex,Movies,./plex_icon_130854.ico,053071
 Plex,Plex,./favicons/cafe.naver.com-5b7eb2b0.ico,https://cafe.naver.com/plexserver
 42jerrykim - Google,Google 캘린더,./favicons/calendar.google.com-c190c32d.ico,https://calendar.google.com/calendar/u/0/r/customweek
@@ -47,7 +47,7 @@ Plex,Plex,./favicons/cafe.naver.com-5b7eb2b0.ico,https://cafe.naver.com/plexserv
 42jerrykim - Google,Mail,./favicons/mail.google.com-25d958f4.ico,https://mail.google.com/mail/u/0/#inbox
 Torrent,Korean Movies,./favicons/iptorrents.com-2bbb1346.ico,https://iptorrents.com/t?87=&77=&101=&89=&90=&96=&6=&48=&54=&62=&38=&68=&20=&100=&7=&1080p=on&2160p=on&q=Korean&qf=all#torrents
 Torrent,Korean TV Shows,./favicons/iptorrents.com-2bbb1346.ico,https://iptorrents.com/t?65=&83=&q=korean&qf=all#torrents
-Online Tool,ChatGPT,,https://chat.openai.com/chat
+Online Tool,ChatGPT,./favicons/chat.openai.com-09733d44.ico,https://chat.openai.com/chat
 Online Tool,DeepSeek,./favicons/chat.deepseek.com-9336ef99.png,https://chat.deepseek.com/
 Online Tool,PlantUML,./favicons/plantuml.com-b4570253.ico,https://plantuml.com/ko/
 Online Tool,RegExr,./favicons/regexr.com-8c12cc0d.png,https://regexr.com/
@@ -73,12 +73,11 @@ My Feed,Facebook,./favicons/www.facebook.com-686e43a9.ico,https://www.facebook.c
 My Feed,Instagram,./favicons/www.instagram.com-dd263dac.png,https://www.instagram.com/reevidkim/
 My Feed,Garmin Connect,./favicons/connect.garmin.com-d0cca8d6.ico,https://connect.garmin.com/modern/dashboard/78401481
 My Feed,Strava 피드,./favicons/www.strava.com-b1ff5161.png,https://www.strava.com/dashboard?feed_type=my_activity
-Shop,Funshop,https://funshop.akamaized.net//newm/app_icon2.png,https://www.funshop.co.kr/
-Shop,10X10,./favicons/www.10x10.co.kr-5e30ad08.png,https://www.10x10.co.kr/
+Shop,10X10,./favicons/www.10x10.co.kr-5e30ad08.ico,https://www.10x10.co.kr/
 Shop,오늘의집,./favicons/ohou.se-555e3744.ico,https://ohou.se/store
 Shop,Danawa,./favicons/www.danawa.com-fdebf780.ico,https://www.danawa.com/
 Shop,Aliexpress,./favicons/best.aliexpress.com-18b58ed4.ico,https://best.aliexpress.com/?lan=ko
-Shop,Naver,,https://shopping.naver.com/
+Shop,Naver,./favicons/shopping.naver.com-b6bcad66.ico,https://shopping.naver.com/
 Shop,Coupang,https://image9.coupangcdn.com/image/coupang/favicon/v2/favicon.ico,https://www.coupang.com/
 희정이,Instagram,./favicons/www.instagram.com-dd263dac.png,https://www.instagram.com/coco_o323/
 Messenger,Hangouts,./favicons/hangouts.google.com-6e4b201c.ico,https://hangouts.google.com/
@@ -86,7 +85,7 @@ Messenger,Facebook Messages,./favicons/www.facebook.com-686e43a9.ico,https://www
 Social Network Service,Facebook,./favicons/www.facebook.com-686e43a9.ico,https://www.facebook.com/
 Social Network Service,Instagram,./favicons/www.instagram.com-dd263dac.png,https://www.instagram.com/
 Social Network Service,Strava,./favicons/www.strava.com-b1ff5161.png,https://www.strava.com/
-Social Network Service,Grocerant (회사 반찬 가게 메뉴),./favicons/band.us-8768dd72.png,https://band.us/band/75692040
+Social Network Service,Grocerant (회사 반찬 가게 메뉴),./favicons/band.us-8768dd72.ico,https://band.us/band/75692040
 Shop,Familynet,http://familynet.samsung.com/sec/static/_images/favicon.ico,http://familynet.samsung.com
 Shop,Bluevery,./favicons/sec.s-bluevery.com-acfe3ede.ico,https://sec.s-bluevery.com
 Official Website,Apple Korea,./favicons/www.apple.com-99b94400.ico,https://www.apple.com/kr/
@@ -98,17 +97,17 @@ Official Website,Garmin,./favicons/www.garmin.co.kr-482ec8f9.png,https://www.gar
 청약,청약홈,./favicons/www.applyhome.co.kr-ee7934ef.ico,https://www.applyhome.co.kr
 청약,청약 일정,./favicons/www.applyhome.co.kr-ee7934ef.ico,https://www.applyhome.co.kr/ai/aib/selectSubscrptCalenderView.do
 Tutorial,모던 JavaScript 튜토리얼,./favicons/ko.javascript.info-0c79d2c2.png,https://ko.javascript.info/
-Tutorial,Markdown Guide,./favicons/www.markdownguide.org-3eb1fc24.png,https://www.markdownguide.org/
-Tutorial,텐서플로우 튜토리얼,https://avatars0.githubusercontent.com/u/15658638?s=200&v=4,https://www.tensorflow.org/tutorials?hl=ko
+Tutorial,Markdown Guide,./favicons/www.markdownguide.org-3eb1fc24.ico,https://www.markdownguide.org/
+Tutorial,텐서플로우 튜토리얼,./favicons/www.tensorflow.org-f08bb89b.png,https://www.tensorflow.org/tutorials?hl=ko
 Samsung,S/W Expert Academy,https://out.swexpertacademy.samsung.com/common/images/banner-club.svg,https://out.swexpertacademy.samsung.com
 Samsung,AD 비번 변경,./favicons/corpadpss.secsso.net-b1e08bb0.ico,https://corpadpss.secsso.net/
 Samsung,Knox Metting,./favicons/new.meeting.samsung.net-4c0637ed.ico,https://new.meeting.samsung.net
 Samsung,Knox Connect,https://new.meeting.samsung.net/favicon.ico,https://connect.samsung.net/
-Samsung,Samsung U,,https://edu.sec.net
+Samsung,Samsung U,./favicons/edu.sec.net-a4327f13.png,https://edu.sec.net
 웹사이트 꾸미기,Bootstrap,./favicons/getbootstrap.com-2ccb85e6.png,https://getbootstrap.com/docs/4.4/getting-started/introduction/
-웹사이트 꾸미기,Font Awesome,./favicons/fontawesome.com-0d4c5a11.png,https://fontawesome.com/
-웹사이트 꾸미기,icon-icons (아이콘 다운로드),,https://icon-icons.com/ko/
-Game,WormsZone,./favicons/wormszone.io-dd343d0a.png,https://WormsZone.io
+웹사이트 꾸미기,Font Awesome,./favicons/fontawesome.com-0d4c5a11.ico,https://fontawesome.com/
+웹사이트 꾸미기,icon-icons (아이콘 다운로드),./favicons/icon-icons.com-656aab2c.png,https://icon-icons.com/ko/
+Game,WormsZone,./favicons/wormszone.io-dd343d0a.ico,https://WormsZone.io
 카메라,Ulanzi (퀵릴리스),./favicons/www.ulanzi.com-8ade5ab0.svg,https://www.ulanzi.com/
 BESPOKE 직화오븐 35L (스마트 쿡) MC35A8599LU,사용자 메뉴얼,https://www.samsung.com/sec/static/_images/favicon.ico,https://downloadcenter.samsung.com/content/UM/202105/20210524163912198/MW8500A_MC35A8599LC_User_KO_210428.pdf
 BESPOKE 직화오븐 35L (스마트 쿡) MC35A8599LU,Quick Guide (간단조리가이드),https://www.samsung.com/sec/static/_images/favicon.ico,https://downloadcenter.samsung.com/content/EM/202007/20200713154436721/MG_MW8000R_MC35R8088LC_DE68-04357F-00_KO_190724.pdf

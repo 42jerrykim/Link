@@ -454,17 +454,42 @@ def discover_favicon_url(
             load_manifest_icon_candidates(manifest_url, timeout=timeout, insecure=insecure)
         )
 
+    best = select_best_icon_candidate(html_candidates + manifest_candidates)
+
+    if not best:
+        # Try to follow a simple HTML redirect (meta refresh / location.href / location.replace)
+        if max_hops > 0:
+            redirect = extract_html_redirect(html)
+            if redirect:
+                next_url = urllib.parse.urljoin(final_url, redirect)
+                return discover_favicon_url(
+                    next_url, timeout=timeout, insecure=insecure, max_hops=max_hops - 1
+                )
+        return urllib.parse.urljoin(final_origin + "/", "favicon.ico")
+
+    # Resolve relative icon URLs against the page/base URL.
+    return best.href
+
+
+def ensure_dir(path: str) -> None:
+    os.makedirs(path, exist_ok=True)
+
+
+def icon_candidate_sort_key(c: IconCandidate) -> tuple:
+    def rel_is_primary(rel: str) -> bool:
+        r = (rel or "").lower()
+        return r != "manifest-icon" and "icon" in r and "apple-touch-icon" not in r and "mask-icon" not in r
+
     def rel_group(rel: str) -> int:
         r = (rel or "").lower()
+        if rel_is_primary(rel):
+            return 0
         if r == "manifest-icon":
             return 1
         if "apple-touch-icon" in r:
             return 2
         if "mask-icon" in r:
             return 3
-        # primary: icon/shortcut icon
-        if "icon" in r:
-            return 0
         return 9
 
     def format_priority(href: str, type_attr: str) -> int:
@@ -485,76 +510,47 @@ def discover_favicon_url(
             return 4
         return 9
 
+    group = rel_group(c.rel)
+    dist = c.sizes_distance if c.sizes_distance is not None else 10**9
+    fmt = format_priority(c.href, c.type_attr)
+    path = urllib.parse.urlparse(c.href).path.lower()
+    is_favicon_ico = 0 if path.endswith("/favicon.ico") else 1
+
+    r = (c.rel or "").lower()
+    rel_tie = 5
+    if rel_is_primary(c.rel):
+        rel_tie = 0 if ("shortcut" in r and "icon" in r) else 1
+
+    area_bias = -min(c.sizes_area, 1024 * 1024)
+    return (group, dist, fmt, is_favicon_ico, rel_tie, area_bias, c.href)
+
+
+def select_best_icon_candidate(candidates: list[IconCandidate]) -> IconCandidate | None:
+    if not candidates:
+        return None
+
     def rel_is_primary(rel: str) -> bool:
         r = (rel or "").lower()
-        return "icon" in r and "apple-touch-icon" not in r and "mask-icon" not in r
+        return r != "manifest-icon" and "icon" in r and "apple-touch-icon" not in r and "mask-icon" not in r
 
-    def candidate_rank(c: IconCandidate) -> tuple:
-        # Favor primary HTML icons; then manifest; then apple-touch; then mask.
-        group = rel_group(c.rel)
-
-        # Prefer sizes close to 32 when sizes are present; unknown sizes go last.
-        dist = c.sizes_distance if c.sizes_distance is not None else 10**9
-
-        fmt = format_priority(c.href, c.type_attr)
-
-        # Prefer explicit favicon.ico path among equals.
-        path = urllib.parse.urlparse(c.href).path.lower()
-        is_favicon_ico = 0 if path.endswith("/favicon.ico") else 1
-
-        # As a weak signal, prefer candidates that declared a size (larger area) over none.
-        # This will not override group/format.
-        area_bias = -min(c.sizes_area, 1024 * 1024)
-
-        # rel tie-breaker: shortcut icon slightly preferred within primary
-        r = (c.rel or "").lower()
-        rel_tie = 0
-        if rel_is_primary(c.rel):
-            rel_tie = 0 if ("shortcut" in r and "icon" in r) else 1
-        else:
-            rel_tie = 5
-
-        return (group, dist, fmt, is_favicon_ico, rel_tie, area_bias, c.href)
-
-    # Primary candidates: HTML primary icons
-    primary = [c for c in html_candidates if rel_is_primary(c.rel)]
-    secondary_manifest = manifest_candidates
-    secondary_touch = [c for c in html_candidates if "apple-touch-icon" in (c.rel or "").lower()]
-    tertiary_mask = [c for c in html_candidates if "mask-icon" in (c.rel or "").lower()]
-
-    pool: list[IconCandidate] = []
+    # Prefer primary HTML icons; then manifest; then apple-touch; then mask.
+    primary = [c for c in candidates if rel_is_primary(c.rel)]
     if primary:
-        pool = primary
-    elif secondary_manifest:
-        pool = secondary_manifest
-    elif secondary_touch:
-        pool = secondary_touch
-    elif tertiary_mask:
-        pool = tertiary_mask
-    else:
-        pool = []
+        return sorted(primary, key=icon_candidate_sort_key)[0]
 
-    best: Optional[IconCandidate] = None
-    if pool:
-        best = sorted(pool, key=candidate_rank)[0]
+    manifest = [c for c in candidates if (c.rel or "").lower() == "manifest-icon"]
+    if manifest:
+        return sorted(manifest, key=icon_candidate_sort_key)[0]
 
-    if not best:
-        # Try to follow a simple HTML redirect (meta refresh / location.href / location.replace)
-        if max_hops > 0:
-            redirect = extract_html_redirect(html)
-            if redirect:
-                next_url = urllib.parse.urljoin(final_url, redirect)
-                return discover_favicon_url(
-                    next_url, timeout=timeout, insecure=insecure, max_hops=max_hops - 1
-                )
-        return urllib.parse.urljoin(final_origin + "/", "favicon.ico")
+    touch = [c for c in candidates if "apple-touch-icon" in (c.rel or "").lower()]
+    if touch:
+        return sorted(touch, key=icon_candidate_sort_key)[0]
 
-    # Resolve relative icon URLs against the page/base URL.
-    return best.href
+    mask = [c for c in candidates if "mask-icon" in (c.rel or "").lower()]
+    if mask:
+        return sorted(mask, key=icon_candidate_sort_key)[0]
 
-
-def ensure_dir(path: str) -> None:
-    os.makedirs(path, exist_ok=True)
+    return sorted(candidates, key=icon_candidate_sort_key)[0]
 
 
 def is_invalid_local_favicon(favicon_value: str, *, outdir: str) -> bool:
@@ -584,6 +580,221 @@ def is_invalid_local_favicon(favicon_value: str, *, outdir: str) -> bool:
     return not sniff_is_image_bytes(head)
 
 
+class PlaywrightClient:
+    def __init__(
+        self,
+        *,
+        headful: bool,
+        timeout_s: float,
+        wait_until: str,
+        insecure: bool,
+    ) -> None:
+        self._headful = headful
+        self._timeout_ms = int(max(timeout_s, 1.0) * 1000)
+        self._wait_until = wait_until
+        self._insecure = insecure
+
+        self._pw = None
+        self._browser = None
+        self._context = None
+        self._page = None
+
+        self.last_error: str | None = None
+
+    def __enter__(self) -> "PlaywrightClient":
+        try:
+            from playwright.sync_api import sync_playwright  # type: ignore
+        except Exception as e:
+            raise RuntimeError(
+                "Playwright is not available. Install with `python -m pip install playwright` "
+                "and then run `python -m playwright install chromium`."
+            ) from e
+
+        self._pw = sync_playwright().start()
+        self._browser = self._pw.chromium.launch(headless=not self._headful)
+        self._context = self._browser.new_context(
+            user_agent=DEFAULT_USER_AGENT,
+            ignore_https_errors=self._insecure,
+        )
+        self._page = self._context.new_page()
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> None:
+        try:
+            if self._context:
+                self._context.close()
+        finally:
+            try:
+                if self._browser:
+                    self._browser.close()
+            finally:
+                if self._pw:
+                    self._pw.stop()
+
+    @property
+    def page(self):
+        assert self._page is not None
+        return self._page
+
+    def _extract_candidates_from_dom(self) -> tuple[list[IconCandidate], list[str]]:
+        """
+        Return (icon_candidates, manifest_urls) from the currently loaded page.
+        """
+        js = r"""
+        () => {
+          const links = Array.from(document.querySelectorAll('link[rel][href]'));
+          const out = [];
+          const manifests = [];
+          for (const l of links) {
+            const relAttr = (l.getAttribute('rel') || '').trim().toLowerCase();
+            const hrefAttr = (l.getAttribute('href') || '').trim();
+            if (!hrefAttr) continue;
+            const relTokens = relAttr.split(/\s+/).filter(Boolean);
+            const absHref = l.href; // resolved
+            if (relTokens.includes('manifest')) {
+              manifests.push(absHref);
+            }
+            if (relAttr.includes('icon')) {
+              out.push({
+                href: absHref,
+                rel: relAttr,
+                sizes: (l.getAttribute('sizes') || '').trim(),
+                type: (l.getAttribute('type') || '').trim()
+              });
+            }
+          }
+          return { icons: out, manifests };
+        }
+        """
+        data = self.page.evaluate(js)
+        icons = data.get("icons") or []
+        manifests = data.get("manifests") or []
+
+        candidates: list[IconCandidate] = []
+        for it in icons:
+            try:
+                href = (it.get("href") or "").strip()
+                rel = (it.get("rel") or "").strip()
+                sizes = (it.get("sizes") or "").strip()
+                type_attr = (it.get("type") or "").strip()
+            except Exception:
+                continue
+            if not href:
+                continue
+            candidates.append(
+                IconCandidate(
+                    href=href,
+                    rel=rel,
+                    sizes_area=parse_sizes(sizes),
+                    sizes_distance=parse_sizes_distance(sizes, target=32),
+                    type_attr=type_attr,
+                )
+            )
+
+        manifest_urls: list[str] = []
+        for m in manifests:
+            if isinstance(m, str) and m.strip():
+                manifest_urls.append(m.strip())
+
+        return candidates, manifest_urls
+
+    def _extract_candidates_from_manifests(self, manifest_urls: list[str]) -> list[IconCandidate]:
+        out: list[IconCandidate] = []
+        for url in manifest_urls:
+            try:
+                resp = self.page.request.get(url, timeout=self._timeout_ms)
+            except Exception:
+                continue
+            if not resp.ok:
+                continue
+            try:
+                text = resp.text()
+            except Exception:
+                continue
+            try:
+                doc = json.loads(text)
+            except Exception:
+                continue
+            icons = doc.get("icons") if isinstance(doc, dict) else None
+            if not isinstance(icons, list):
+                continue
+            for icon in icons:
+                if not isinstance(icon, dict):
+                    continue
+                src = (icon.get("src") or "").strip()
+                if not src:
+                    continue
+                href = urllib.parse.urljoin(resp.url, src)
+                sizes = (icon.get("sizes") or "").strip()
+                type_attr = (icon.get("type") or "").strip()
+                out.append(
+                    IconCandidate(
+                        href=href,
+                        rel="manifest-icon",
+                        sizes_area=parse_sizes(sizes),
+                        sizes_distance=parse_sizes_distance(sizes, target=32),
+                        type_attr=type_attr,
+                    )
+                )
+        return out
+
+    def try_download_favicon(self, page_url: str) -> tuple[bytes, str | None, str] | None:
+        """
+        Returns (body, content_type, final_url) or None.
+        """
+        self.last_error = None
+
+        try:
+            self.page.goto(
+                page_url,
+                wait_until=self._wait_until,
+                timeout=self._timeout_ms,
+            )
+        except Exception as e:
+            self.last_error = f"playwright_goto_failed: {type(e).__name__}"
+            return None
+
+        try:
+            dom_candidates, manifest_urls = self._extract_candidates_from_dom()
+        except Exception as e:
+            dom_candidates, manifest_urls = [], []
+
+        manifest_candidates: list[IconCandidate] = []
+        if manifest_urls:
+            try:
+                manifest_candidates = self._extract_candidates_from_manifests(manifest_urls)
+            except Exception:
+                manifest_candidates = []
+
+        candidates = dom_candidates + manifest_candidates
+        if not candidates:
+            self.last_error = "playwright_no_icon_candidates"
+            return None
+
+        # Try candidates in priority order. If the best is blocked, try the next.
+        ordered = sorted(candidates, key=icon_candidate_sort_key)
+        last_status = None
+        for c in ordered[:12]:  # cap to keep runtime bounded
+            try:
+                resp = self.page.request.get(c.href, timeout=self._timeout_ms)
+            except Exception as e:
+                continue
+            last_status = resp.status
+            if not resp.ok:
+                continue
+            try:
+                body = resp.body()
+            except Exception:
+                continue
+            ct = resp.headers.get("content-type")
+            if not is_image_response(body, ct):
+                continue
+            return body, ct, resp.url
+
+        self.last_error = f"playwright_image_fetch_failed status={last_status}"
+        return None
+
+
 def download_favicon(
     page_url: str,
     *,
@@ -591,7 +802,9 @@ def download_favicon(
     timeout: float,
     insecure: bool,
     dry_run: bool,
-) -> str | None:
+    playwright_client: PlaywrightClient | None = None,
+    preferred_icon_url: str | None = None,
+) -> tuple[str | None, str | None]:
     """
     Downloads favicon for a page URL, saves under outdir, returns local relative path.
     """
@@ -604,6 +817,10 @@ def download_favicon(
     discovered_origin = f"{parsed_discovered.scheme}://{parsed_discovered.netloc}" if parsed_discovered.netloc else origin
 
     candidates: list[str] = []
+
+    # If CSV already provides an icon URL, try it first (helps PDFs/login-gated pages).
+    if preferred_icon_url and is_http_url(preferred_icon_url):
+        candidates.append(preferred_icon_url.strip())
     if discovered_icon_url:
         candidates.append(discovered_icon_url)
     # Common fallbacks for the discovered/final origin
@@ -619,6 +836,29 @@ def download_favicon(
         candidates.append("https://www.synology.com/favicon.ico")
         candidates.append("https://www.synology.com/favicon.png")
 
+    last_reason: str | None = None
+
+    def try_fetch_image(url: str) -> tuple[bytes, str | None, str] | None:
+        nonlocal last_reason
+        try:
+            b, ct, final_u = http_get(
+                url,
+                timeout=timeout,
+                insecure=insecure,
+                accept="image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+                max_bytes=2_000_000,
+            )
+        except urllib.error.HTTPError as e:
+            last_reason = f"urllib_http_{e.code}"
+            return None
+        except Exception:
+            last_reason = "urllib_error"
+            return None
+        if is_image_response(b, ct):
+            return b, ct, final_u
+        last_reason = "urllib_non_image"
+        return None
+
     tried: set[str] = set()
     body = b""
     content_type: str | None = None
@@ -627,25 +867,21 @@ def download_favicon(
         if not icon_url or icon_url in tried:
             continue
         tried.add(icon_url)
-        try:
-            body, content_type, final_icon_url = http_get(
-                icon_url,
-                timeout=timeout,
-                insecure=insecure,
-                accept="image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
-                max_bytes=2_000_000,
-            )
-        except Exception:
-            continue
-        if is_image_response(body, content_type):
+        got = try_fetch_image(icon_url)
+        if got:
+            body, content_type, final_icon_url = got
             break
-        # Not an image (e.g., HTML). Keep trying other candidates.
-        body = b""
-        content_type = None
-        final_icon_url = ""
 
     if not body:
-        return None
+        # Browser fallback (WAF/captcha/JS rendered): use Playwright if enabled.
+        if playwright_client:
+            got = playwright_client.try_download_favicon(page_url)
+            if got:
+                body, content_type, final_icon_url = got
+            else:
+                last_reason = playwright_client.last_error or "playwright_failed"
+        if not body:
+            return None, last_reason or "no_image"
 
     ext = guess_extension(final_icon_url, content_type)
     name = safe_netloc(p.netloc)
@@ -655,12 +891,12 @@ def download_favicon(
     rel_path = "./" + "/".join([os.path.basename(outdir), filename])
 
     if dry_run:
-        return rel_path
+        return rel_path, None
 
     ensure_dir(outdir)
     with open(abs_path, "wb") as f:
         f.write(body)
-    return rel_path
+    return rel_path, None
 
 
 def main(argv: list[str]) -> int:
@@ -668,6 +904,19 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--csv", dest="csv_path", default="link2.csv")
     parser.add_argument("--outdir", dest="outdir", default="favicons")
     parser.add_argument("--timeout", type=float, default=12.0)
+    parser.add_argument(
+        "--playwright",
+        action="store_true",
+        help="On failure, use Playwright (headless Chromium) to extract/download favicon (WAF/JS-friendly).",
+    )
+    parser.add_argument("--headful", action="store_true", help="Run Playwright in headed mode (debug).")
+    parser.add_argument("--playwright-timeout", type=float, default=15.0, help="Playwright timeout in seconds.")
+    parser.add_argument(
+        "--playwright-wait",
+        choices=["domcontentloaded", "load", "networkidle"],
+        default="domcontentloaded",
+        help="Playwright wait_until option for page navigation.",
+    )
 
     ssl_group = parser.add_mutually_exclusive_group()
     ssl_group.add_argument("--insecure", action="store_true", default=True, help="Disable TLS verification (default).")
@@ -805,43 +1054,64 @@ def main(argv: list[str]) -> int:
     failures = 0
 
     start = time.time()
-    for row in rows:
-        link = (row.get("link") or "").strip()
-        if not is_http_url(link):
-            continue
 
-        attempted += 1
-        p = urllib.parse.urlparse(link)
-        origin = f"{p.scheme}://{p.netloc}"
-
-        old_favicon = (row.get("favicon") or "").strip()
-        old_local_invalid = is_invalid_local_favicon(old_favicon, outdir=outdir)
-
-        if origin in origin_cache:
-            new_favicon = origin_cache[origin]
-        else:
-            print(f"[try] {origin}", flush=True)
-            new_favicon = download_favicon(
-                link,
-                outdir=outdir,
-                timeout=args.timeout,
+    pw_client: PlaywrightClient | None = None
+    if args.playwright:
+        try:
+            pw_client = PlaywrightClient(
+                headful=bool(args.headful),
+                timeout_s=float(args.playwright_timeout),
+                wait_until=str(args.playwright_wait),
                 insecure=insecure,
-                dry_run=args.dry_run,
-            )
-            if not new_favicon:
-                failures += 1
-                print(f"[fail] {link}", flush=True)
-                if old_local_invalid and not args.dry_run:
-                    row["favicon"] = ""
-                    changed += 1
-                    print(f"[clear] {origin} invalid local favicon -> ''", flush=True)
-                continue
-            origin_cache[origin] = new_favicon
+            ).__enter__()
+        except Exception as e:
+            print(f"[error] Playwright init failed: {e}", file=sys.stderr)
+            return 2
 
-        if old_favicon != new_favicon:
-            row["favicon"] = new_favicon
-            changed += 1
-            print(f"[ok] {origin} -> {new_favicon}", flush=True)
+    try:
+        for row in rows:
+            link = (row.get("link") or "").strip()
+            if not is_http_url(link):
+                continue
+
+            attempted += 1
+            p = urllib.parse.urlparse(link)
+            origin = f"{p.scheme}://{p.netloc}"
+
+            old_favicon = (row.get("favicon") or "").strip()
+            old_local_invalid = is_invalid_local_favicon(old_favicon, outdir=outdir)
+
+            if origin in origin_cache:
+                new_favicon = origin_cache[origin]
+            else:
+                print(f"[try] {origin}", flush=True)
+                new_favicon, reason = download_favicon(
+                    link,
+                    outdir=outdir,
+                    timeout=args.timeout,
+                    insecure=insecure,
+                    dry_run=args.dry_run,
+                    playwright_client=pw_client,
+                    preferred_icon_url=old_favicon if is_http_url(old_favicon) else None,
+                )
+                if not new_favicon:
+                    failures += 1
+                    rs = f" reason={reason}" if reason else ""
+                    print(f"[fail] {link}{rs}", flush=True)
+                    if old_local_invalid and not args.dry_run:
+                        row["favicon"] = ""
+                        changed += 1
+                        print(f"[clear] {origin} invalid local favicon -> ''", flush=True)
+                    continue
+                origin_cache[origin] = new_favicon
+
+            if old_favicon != new_favicon:
+                row["favicon"] = new_favicon
+                changed += 1
+                print(f"[ok] {origin} -> {new_favicon}", flush=True)
+    finally:
+        if pw_client:
+            pw_client.__exit__(None, None, None)
 
     if args.dry_run:
         print(
