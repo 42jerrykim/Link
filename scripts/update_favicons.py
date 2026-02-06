@@ -114,6 +114,34 @@ def is_http_url(value: str) -> bool:
     return p.scheme in ("http", "https") and bool(p.netloc)
 
 
+def first_path_segment(url: str) -> str:
+    try:
+        p = urllib.parse.urlparse(url)
+    except Exception:
+        return ""
+    path = (p.path or "").strip("/")
+    if not path:
+        return ""
+    return path.split("/", 1)[0].lower()
+
+
+def favicon_cache_key(page_url: str) -> str:
+    """
+    Cache key deciding whether multiple URLs share one favicon.
+
+    Default: origin (scheme://host:port)
+    Special: for www.google.com / www.google.co.kr, split by first path segment
+    so `/adsense` and `/search` can have different favicons.
+    """
+    p = urllib.parse.urlparse(page_url)
+    origin = f"{p.scheme}://{p.netloc}"
+    host = (p.hostname or "").lower()
+    if host in ("www.google.com", "www.google.co.kr"):
+        seg = first_path_segment(page_url)
+        return f"{origin}/{seg}" if seg else f"{origin}/"
+    return origin
+
+
 def safe_netloc(netloc: str) -> str:
     # "example.com:8080" -> "example.com_8080"
     return netloc.lower().replace(":", "_")
@@ -804,12 +832,15 @@ def download_favicon(
     dry_run: bool,
     playwright_client: PlaywrightClient | None = None,
     preferred_icon_url: str | None = None,
+    favicon_key: str | None = None,
 ) -> tuple[str | None, str | None]:
     """
     Downloads favicon for a page URL, saves under outdir, returns local relative path.
     """
     p = urllib.parse.urlparse(page_url)
     origin = f"{p.scheme}://{p.netloc}"
+    if not favicon_key:
+        favicon_key = origin
 
     # Discover a likely icon URL (may come from the final redirected page).
     discovered_icon_url = discover_favicon_url(page_url, timeout=timeout, insecure=insecure)
@@ -885,8 +916,8 @@ def download_favicon(
 
     ext = guess_extension(final_icon_url, content_type)
     name = safe_netloc(p.netloc)
-    # If two different origins have same netloc (rare), include a short hash of origin.
-    filename = f"{name}-{short_hash(origin)}{ext}"
+    # Include a short hash of favicon_key so same host can split by path.
+    filename = f"{name}-{short_hash(favicon_key)}{ext}"
     abs_path = os.path.join(outdir, filename)
     rel_path = "./" + "/".join([os.path.basename(outdir), filename])
 
@@ -1048,7 +1079,7 @@ def main(argv: list[str]) -> int:
         print(f"[error] CSV must include 'link' and 'favicon' columns. Got: {fieldnames}", file=sys.stderr)
         return 2
 
-    origin_cache: dict[str, str] = {}
+    favicon_cache: dict[str, str] = {}
     changed = 0
     attempted = 0
     failures = 0
@@ -1077,12 +1108,13 @@ def main(argv: list[str]) -> int:
             attempted += 1
             p = urllib.parse.urlparse(link)
             origin = f"{p.scheme}://{p.netloc}"
+            key = favicon_cache_key(link)
 
             old_favicon = (row.get("favicon") or "").strip()
             old_local_invalid = is_invalid_local_favicon(old_favicon, outdir=outdir)
 
-            if origin in origin_cache:
-                new_favicon = origin_cache[origin]
+            if key in favicon_cache:
+                new_favicon = favicon_cache[key]
             else:
                 print(f"[try] {origin}", flush=True)
                 new_favicon, reason = download_favicon(
@@ -1093,6 +1125,7 @@ def main(argv: list[str]) -> int:
                     dry_run=args.dry_run,
                     playwright_client=pw_client,
                     preferred_icon_url=old_favicon if is_http_url(old_favicon) else None,
+                    favicon_key=key,
                 )
                 if not new_favicon:
                     failures += 1
@@ -1103,7 +1136,7 @@ def main(argv: list[str]) -> int:
                         changed += 1
                         print(f"[clear] {origin} invalid local favicon -> ''", flush=True)
                     continue
-                origin_cache[origin] = new_favicon
+                favicon_cache[key] = new_favicon
 
             if old_favicon != new_favicon:
                 row["favicon"] = new_favicon
@@ -1116,7 +1149,7 @@ def main(argv: list[str]) -> int:
     if args.dry_run:
         print(
             f"[dry-run] attempted={attempted} changed={changed} "
-            f"failures={failures} origins={len(origin_cache)}",
+            f"failures={failures} origins={len(favicon_cache)}",
             flush=True,
         )
         return 0
@@ -1138,7 +1171,7 @@ def main(argv: list[str]) -> int:
     elapsed = time.time() - start
     print(
         f"[done] attempted={attempted} changed={changed} failures={failures} "
-        f"origins={len(origin_cache)} elapsed={elapsed:.1f}s",
+        f"origins={len(favicon_cache)} elapsed={elapsed:.1f}s",
         flush=True,
     )
     return 0
