@@ -1,0 +1,55 @@
+<!DOCTYPE HTML>
+<html lang="ko">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+    <meta name="description" lang="ko" content="잠시 후 다시 확인해주세요! : 네이버 쇼핑">
+    <title>에러 페이지 : 네이버 쇼핑</title>
+    <link rel="stylesheet" type="text/css" href="https://shopv.pstatic.net/web/maintenance/limit/naver_error.css">
+    <script src="https://shopv.pstatic.net/web/maintenance/limit/grafolio.js"></script>
+</head>
+<body>
+<div id="u_skip" class="u_skip">
+    <a href="#content">본문 바로가기</a>
+</div>
+<div class="wrap">
+    <div class="header" role="banner">
+        <h1 class="logo">
+            <a href="https://naver.com" class="logo_link">
+                <img src="https://shopv.pstatic.net/web/maintenance/limit/naver_logo.png" width="90" height="16" alt="네이버">
+            </a>
+        </h1>
+        <div class="nav" role="navigation">
+            <a href="https://naver.com" class="nav_link">네이버홈</a>
+            <a href="https://help.pay.naver.com" class="nav_link">쇼핑&페이 고객센터</a>
+        </div>
+    </div>
+    <hr>
+    <div class="container" role="main">
+        <div class="content" id="content">
+            <div class="image_area _errorImage"></div>
+
+            <div class="info_area">
+                <div class="info_txt">
+                    <strong class="tit">잠시 후 다시 확인해주세요!</strong>
+                    <p class="txt">
+                        지금 이 서비스와 연결할 수 없습니다.<br>
+                        문제를 해결하기 위해 열심히 노력하고 있습니다.<br>
+                        잠시 후 다시 확인해주세요.
+                    </p>
+                </div>
+                <div class="info_link">
+                    <a href="javascript:history.go(-1)" class="link_prev">이전 페이지</a><a href="https://shopping.naver.com" class="link_home">네이버 쇼핑 홈</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="footer" role="contentinfo">
+        <address>
+            <span>Copyright</span> ©<a href="http://www.navercorp.com" class="link_naver" target="_blank">NAVER Corp.</a> <span>All Rights Reserved.</span>
+        </address>
+    </div>
+</div>
+</body>
+</html>

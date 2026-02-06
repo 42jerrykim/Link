@@ -200,21 +200,22 @@
         // favicon 이미지 처리
         const img = document.createElement('img');
         let faviconURL = "";
+        const defaultFavicon = "./externallink_111153.ico";
         if (item.favicon && item.favicon.trim() !== "") {
           faviconURL = item.favicon;
         } else {
           try {
             const urlObj = new URL(item.link);
-            faviconURL = "https://www.google.com/s2/favicons?domain=" + urlObj.hostname;
+            faviconURL = urlObj.origin + "/favicon.ico";
           } catch (e) {
-            faviconURL = "https://42jerrykim.github.io/favicon.ico";
+            faviconURL = defaultFavicon;
           }
         }
         img.src = faviconURL;
         img.alt = item.name;
         img.onerror = function() {
           this.onerror = null;
-          this.src = "https://42jerrykim.github.io/favicon.ico";
+          this.src = defaultFavicon;
         };
         link.appendChild(img);
         
