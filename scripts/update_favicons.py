@@ -608,6 +608,45 @@ def is_invalid_local_favicon(favicon_value: str, *, outdir: str) -> bool:
     return not sniff_is_image_bytes(head)
 
 
+def forced_local_favicon_status(
+    favicon_value: str,
+    *,
+    forced_dir: str,
+) -> tuple[bool, bool]:
+    """
+    Forced(local) favicon pinning:
+
+    If favicon_value points under forced_dir (e.g. ./favicons_forced/x.ico),
+    treat it as pinned and do not overwrite it.
+
+    Returns: (is_forced_path, is_valid_image_file)
+    """
+    v = (favicon_value or "").strip()
+    if not v:
+        return False, False
+
+    v_norm = v.replace("\\", "/")
+    forced_base = os.path.basename(forced_dir).replace("\\", "/").strip("/")
+    if not forced_base:
+        return False, False
+
+    prefix1 = f"./{forced_base}/"
+    prefix2 = f"{forced_base}/"
+    if not (v_norm.startswith(prefix1) or v_norm.startswith(prefix2)):
+        return False, False
+
+    rel = v_norm[2:] if v_norm.startswith("./") else v_norm
+    abs_path = os.path.join(os.getcwd(), rel.replace("/", os.sep))
+    if not os.path.isfile(abs_path):
+        return True, False
+    try:
+        with open(abs_path, "rb") as f:
+            head = f.read(2048)
+    except Exception:
+        return True, False
+    return True, sniff_is_image_bytes(head)
+
+
 class PlaywrightClient:
     def __init__(
         self,
@@ -934,6 +973,13 @@ def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description="Download favicons and update CSV.")
     parser.add_argument("--csv", dest="csv_path", default="link2.csv")
     parser.add_argument("--outdir", dest="outdir", default="favicons")
+    parser.add_argument(
+        "--forced-dir",
+        dest="forced_dir",
+        default="favicons_forced",
+        help="Directory containing manually pinned favicons. "
+        "If a CSV row's favicon points under this directory, it will not be overwritten.",
+    )
     parser.add_argument("--timeout", type=float, default=12.0)
     parser.add_argument(
         "--playwright",
@@ -963,6 +1009,7 @@ def main(argv: list[str]) -> int:
 
     csv_path = args.csv_path
     outdir = args.outdir
+    forced_dir = args.forced_dir
 
     if args.backup and not args.dry_run:
         backup_path = csv_path + ".bak"
@@ -1083,6 +1130,7 @@ def main(argv: list[str]) -> int:
     changed = 0
     attempted = 0
     failures = 0
+    forced_skipped = 0
 
     start = time.time()
 
@@ -1105,12 +1153,27 @@ def main(argv: list[str]) -> int:
             if not is_http_url(link):
                 continue
 
+            old_favicon = (row.get("favicon") or "").strip()
+            is_forced_path, forced_valid = forced_local_favicon_status(
+                old_favicon,
+                forced_dir=forced_dir,
+            )
+            if is_forced_path and forced_valid:
+                forced_skipped += 1
+                print(f"[forced] {link} -> {old_favicon}", flush=True)
+                continue
+            if is_forced_path and not forced_valid:
+                print(
+                    f"[warn] forced favicon is missing/invalid; will refresh from web: {link} -> {old_favicon}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+
             attempted += 1
             p = urllib.parse.urlparse(link)
             origin = f"{p.scheme}://{p.netloc}"
             key = favicon_cache_key(link)
 
-            old_favicon = (row.get("favicon") or "").strip()
             old_local_invalid = is_invalid_local_favicon(old_favicon, outdir=outdir)
 
             if key in favicon_cache:
@@ -1131,7 +1194,8 @@ def main(argv: list[str]) -> int:
                     failures += 1
                     rs = f" reason={reason}" if reason else ""
                     print(f"[fail] {link}{rs}", flush=True)
-                    if old_local_invalid and not args.dry_run:
+                    # Do not clear pinned icons; only clear invalid local files under outdir.
+                    if old_local_invalid and not args.dry_run and not is_forced_path:
                         row["favicon"] = ""
                         changed += 1
                         print(f"[clear] {origin} invalid local favicon -> ''", flush=True)
@@ -1170,7 +1234,7 @@ def main(argv: list[str]) -> int:
 
     elapsed = time.time() - start
     print(
-        f"[done] attempted={attempted} changed={changed} failures={failures} "
+        f"[done] attempted={attempted} forced_skipped={forced_skipped} changed={changed} failures={failures} "
         f"origins={len(favicon_cache)} elapsed={elapsed:.1f}s",
         flush=True,
     )

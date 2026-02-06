@@ -1,8 +1,8 @@
 group,name,favicon,link
 My,DSM,./favicons/quickconnect.to-e73b94e4.ico,http://QuickConnect.to/jerrykim
 My,Google 캘린더,./favicons/calendar.google.com-c190c32d.ico,https://calendar.google.com/calendar/u/0/r/customweek
-My,Tasks,./favicons/calendar.google.com-c190c32d.ico,https://calendar.google.com/calendar/u/0/r/tasks
-My,Google Alart,./favicons/www.google.co.kr-50f4cc43.ico,https://www.google.co.kr/alerts
+My,Tasks,./favicons_forced/Google_Tasks.png,https://calendar.google.com/calendar/u/0/r/tasks
+My,Google Alart,./favicons/www.google.co.kr-37e5db1f.ico,https://www.google.co.kr/alerts
 My,DSM,./favicons/jerrykim.synology.me_5001-3aa51df3.png,https://jerrykim.synology.me:5001/
 My,Surveillance Station,./favicons/jerrykim.synology.me_5001-3aa51df3.png,https://jerrykim.synology.me:5001/webman/3rdparty/SurveillanceStation/
 My,Scrap,./favicons/github.com-84b7e44a.png,https://github.com/42jerrykim/42jerrykim.github.io/edit/main/scrap.md
@@ -11,13 +11,13 @@ My,Link 수정,./favicons/github.dev-bd74a433.ico,https://github.dev/42jerrykim/
 블로그,Blog,./favicons/42jerrykim.github.io-2f6453da.ico,https://42jerrykim.github.io/
 블로그,Blog Repo,./favicons/github.com-84b7e44a.png,https://github.com/42jerrykim/42jerrykim.github.io
 블로그,Blog Post 작성,./favicons/github.dev-bd74a433.ico,https://github.dev/42jerrykim/42jerrykim.github.io
-블로그,AdSence,./favicons/www.google.com-ef7efc98.ico,https://www.google.com/adsense/new/u/0/pub-1523508823345999/
+블로그,AdSence,./favicons/www.google.com-96ab3dfe.ico,https://www.google.com/adsense/new/u/0/pub-1523508823345999/
 블로그,Search Console,./favicons/search.google.com-991241b4.png,https://search.google.com/search-console
 블로그,Analytics,./favicons/analytics.google.com-2971a4bb.ico,https://analytics.google.com/analytics/web/#/p378371944/
 블로그,SearchAdvisor,./favicons/searchadvisor.naver.com-4e39447a.ico,https://searchadvisor.naver.com/
 블로그,WebMasters,./favicons/www.bing.com-0d6e3170.ico,https://www.bing.com/webmasters
-블로그,Google,./favicons/www.google.com-ef7efc98.ico,https://www.google.com/search?client=firefox-b-d&q=site%3A42jerrykim.github.io
-블로그,맞춤법 ,http://speller.cs.pusan.ac.kr/favicon.ico,https://nara-speller.co.kr/speller/
+블로그,Google,./favicons/www.google.com-928f921d.ico,https://www.google.com/search?client=firefox-b-d&q=site%3A42jerrykim.github.io
+블로그,맞춤법 ,./favicons/nara-speller.co.kr-f7c22496.ico,https://nara-speller.co.kr/speller/
 Photo,Photo,./favicons/jerrykim.synology.me_5001-3aa51df3.png,https://jerrykim.synology.me:5001/?launchApp=SYNO.Foto.AppInstance
 Photo,Immich,./favicons/immich.jerrykim.synology.me-3679272e.png,https://immich.jerrykim.synology.me
 Photo,Google,./favicons/photos.google.com-6cb79b66.svg,https://photos.google.com/
@@ -45,8 +45,8 @@ Plex,Plex,./favicons/cafe.naver.com-5b7eb2b0.ico,https://cafe.naver.com/plexserv
 42jerrykim - Google,Gdrive,./favicons/drive.google.com-75b7f62f.ico,https://drive.google.com/drive/u/0/
 42jerrykim - Google,Photo,./favicons/photos.google.com-6cb79b66.svg,https://photos.google.com/u/0/
 42jerrykim - Google,Mail,./favicons/mail.google.com-25d958f4.ico,https://mail.google.com/mail/u/0/#inbox
-Torrent,Korean Movies,./favicons/iptorrents.com-2bbb1346.ico,https://iptorrents.com/t?87=&77=&101=&89=&90=&96=&6=&48=&54=&62=&38=&68=&20=&100=&7=&1080p=on&2160p=on&q=Korean&qf=all#torrents
-Torrent,Korean TV Shows,./favicons/iptorrents.com-2bbb1346.ico,https://iptorrents.com/t?65=&83=&q=korean&qf=all#torrents
+Torrent,Korean Movies,./favicons_forced/iptorrent_favicon.ico,https://iptorrents.com/t?87=&77=&101=&89=&90=&96=&6=&48=&54=&62=&38=&68=&20=&100=&7=&1080p=on&2160p=on&q=Korean&qf=all#torrents
+Torrent,Korean TV Shows,./favicons_forced/iptorrent_favicon.ico,https://iptorrents.com/t?65=&83=&q=korean&qf=all#torrents
 Online Tool,ChatGPT,./favicons/chat.openai.com-09733d44.ico,https://chat.openai.com/chat
 Online Tool,DeepSeek,./favicons/chat.deepseek.com-9336ef99.png,https://chat.deepseek.com/
 Online Tool,PlantUML,./favicons/plantuml.com-b4570253.ico,https://plantuml.com/ko/
